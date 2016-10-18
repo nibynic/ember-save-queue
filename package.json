@@ -1,7 +1,7 @@
 {
   "name": "ember-save-queue",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "0.0.1",
+  "description": "Autosave for Ember Data",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -11,11 +11,11 @@
     "start": "ember server",
     "test": "ember try:each"
   },
-  "repository": "",
+  "repository": "https://github.com/nibynic/ember-save-queue",
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "author": "Paweł Bator",
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.2",
@@ -41,7 +41,10 @@
     "loader.js": "^4.0.1"
   },
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "save-queue",
+    "ember-data",
+    "autosave"
   ],
   "dependencies": {
     "ember-cli-babel": "^5.1.6"
