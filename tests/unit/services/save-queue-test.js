@@ -120,3 +120,31 @@ test("it re-enqueues record if after save it still has some dirty attributes", f
     service.enqueue(record1);
   });
 });
+
+test("it repeats repeats save on failure", function(assert) {
+  let saveCount = 0, eventCount = 0;
+
+  let service = this.subject();
+  service.on("error", function() {
+    eventCount++;
+  });
+
+  let record1 = Model.extend({
+    save() {
+      saveCount++;
+      return Ember.RSVP.reject();
+    }
+  }).create();
+
+  Ember.run(function() {
+    service.set("delay", 0);
+    service.set("autoSave", false);
+    service.enqueue(record1);
+  });
+
+  Ember.run(function() {
+    service.save();
+  });
+  assert.equal(saveCount, 5, "should try to save 5 times");
+  assert.equal(eventCount, 1, "should trigger error event 1 time");
+});

@@ -48,17 +48,19 @@ export default Ember.Service.extend(Ember.Evented, {
     if (item) {
       if (item.get("canSave")) {
         this.set("isSaving", true);
-        item.model.save().then(() => {}, () => {
-          if (item.attemptCount < 5) {
-            item.attemptCount++;
-            queue.pushObject(item);
-          } else {
-            this.trigger("error", item.model);
-          }
-        }).finally(() => {
+        item.model.save().then(() => {
           this.set("isSaving", false);
           if (!item.get("model.hasDirtyAttributes")) {
             queue.removeObject(item.destroy());
+          }
+          this.saveNext();
+        }, () => {
+          this.set("isSaving", false);
+          if (item.attemptCount < 4) {
+            item.attemptCount++;
+          } else {
+            queue.removeObject(item.destroy());
+            this.trigger("error", item.model);
           }
           this.saveNext();
         });
