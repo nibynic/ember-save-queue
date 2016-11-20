@@ -72,7 +72,8 @@ export default Ember.Service.extend(Ember.Evented, {
     return Ember.A();
   }),
 
-  autoSaveAfterCanSave: Ember.observer("queue.@each.canSave", function() {
+  autoSaveAfterCanSave: Ember.observer("autoSave", "queue.@each.canSave",
+    function() {
     if (this.get("autoSave")) {
       this.saveNext();
     }

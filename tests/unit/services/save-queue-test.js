@@ -82,6 +82,34 @@ test("it performs delayed autosave", function(assert) {
   assert.ok(!didSave, "should not start saving immediately");
 });
 
+test("it doesn't autosave until autoSave property is set true", function(assert) {
+  assert.expect(3);
+  var didSave = false;
+
+  let service = this.subject();
+  let record1 = Model.extend({
+    save() {
+      assert.ok(true, "should call save method");
+      didSave = true;
+      return this._super();
+    }
+  }).create();
+
+  Ember.run(function() {
+    service.set("delay", 0);
+    service.set("autoSave", false);
+    service.enqueue(record1);
+  });
+
+  assert.ok(!didSave, "should not start saving immediately");
+
+  Ember.run(function() {
+    service.set("autoSave", true);
+  });
+
+  assert.ok(didSave, "should start saving");
+});
+
 test("it dequeues record after save", function(assert) {
   let service = this.subject();
   let record1 = Model.create();
