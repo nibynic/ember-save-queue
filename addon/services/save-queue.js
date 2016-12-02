@@ -7,6 +7,7 @@ export default Ember.Service.extend(Ember.Evented, {
   delay: 1000,
 
   isSaving: false,
+  length: Ember.computed.reads("queue.length"),
 
   enqueue(...models) {
     let queue = this.get("queue");
@@ -31,6 +32,11 @@ export default Ember.Service.extend(Ember.Evented, {
         Ember.A(queue.filterBy("model", model)).invoke("destroy")
       );
     });
+  },
+
+  clear() {
+    this.get("queue").invoke("destroy");
+    this.get("queue").clear();
   },
 
   save() {

@@ -17,6 +17,7 @@ test("it enqueues & dequeues records", function(assert) {
   Ember.run(function() {
     service.enqueue(record1);
   });
+  assert.equal(service.get("length"), 1, "should update queue length");
   assert.equal(service.get("queue.lastObject.model"), record1, "should add the first record at the end");
 
   Ember.run(function() {
@@ -27,15 +28,20 @@ test("it enqueues & dequeues records", function(assert) {
   Ember.run(function() {
     service.enqueue(record1, record3);
   });
-  assert.equal(service.get("queue.length"), 3, "there should be 3 records in the queue");
+  assert.equal(service.get("length"), 3, "there should be 3 records in the queue");
   assert.equal(service.get("queue").objectAt(1).get("model"), record1, "the first record should be at the second position in the queue");
   assert.equal(service.get("queue.lastObject.model"), record3, "should add the third record at the end");
 
   Ember.run(function() {
     service.dequeue(record2, record3);
   });
-  assert.equal(service.get("queue.length"), 1, "there should be 1 record in the queue");
+  assert.equal(service.get("length"), 1, "there should be 1 record in the queue");
   assert.equal(service.get("queue.lastObject.model"), record1, "the first record should be at the end");
+
+  Ember.run(function() {
+    service.clear();
+  });
+  assert.equal(service.get("length"), 0, "queue should be empty");
 });
 
 test("it performs immediate autosave", function(assert) {
