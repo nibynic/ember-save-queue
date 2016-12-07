@@ -182,3 +182,20 @@ test("it repeats repeats save on failure", function(assert) {
   assert.equal(saveCount, 5, "should try to save 5 times");
   assert.equal(eventCount, 1, "should trigger error event 1 time");
 });
+
+test("it triggers events", function(assert) {
+  let service = this.subject();
+  let completeCount = 0;
+  let record1 = Model.create();
+
+  service.on("complete", function() {
+    completeCount++;
+  });
+
+  Ember.run(function() {
+    service.set("delay", 0);
+    service.enqueue(record1);
+  });
+
+  assert.equal(completeCount, 1, "should trigger complete event exactly one time");
+});

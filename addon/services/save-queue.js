@@ -9,6 +9,8 @@ export default Ember.Service.extend(Ember.Evented, {
   isSaving: false,
   length: Ember.computed.reads("queue.length"),
 
+  wasSaving: false,
+
   enqueue(...models) {
     let queue = this.get("queue");
     models.forEach((model) => {
@@ -54,6 +56,7 @@ export default Ember.Service.extend(Ember.Evented, {
     if (item) {
       if (item.get("canSave")) {
         this.set("isSaving", true);
+        this.set("wasSaving", true);
         item.model.save().then(() => {
           this.set("isSaving", false);
           if (!item.get("model.hasDirtyAttributes")) {
@@ -71,6 +74,9 @@ export default Ember.Service.extend(Ember.Evented, {
           this.saveNext();
         });
       }
+    } else if(this.get("wasSaving")) {
+      this.set("wasSaving", false);
+      this.trigger("complete");
     }
   },
 
