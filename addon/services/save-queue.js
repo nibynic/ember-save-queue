@@ -9,9 +9,18 @@ export default Ember.Service.extend(Ember.Evented, {
   retryDelay: 10000,
 
   isSaving: false,
+  isOnline: true,
   length: Ember.computed.reads("queue.length"),
 
   wasSaving: false,
+
+  init() {
+    Ember.$(window).on("online offline", Ember.$.proxy(this.handleNetwork, this));
+  },
+
+  willDestroy() {
+    Ember.$(window).off("online offline", this.handleNetwork);
+  },
 
   enqueue(...models) {
     let queue = this.get("queue");
@@ -48,7 +57,7 @@ export default Ember.Service.extend(Ember.Evented, {
   },
 
   saveNext() {
-    if (this.get("isSaving")) {
+    if (this.get("isSaving") || !this.get("isOnline")) {
       return;
     }
 
@@ -91,5 +100,17 @@ export default Ember.Service.extend(Ember.Evented, {
     if (this.get("autoSave")) {
       this.saveNext();
     }
-  })
+  }),
+
+  handleNetwork(event) {
+    switch (event.type) {
+      case "offline":
+        this.set("isOnline", false);
+        break;
+      case "online":
+        this.set("isOnline", true);
+        this.saveNext();
+        break;
+    }
+  }
 });

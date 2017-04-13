@@ -200,6 +200,19 @@ test("it repeats save on failure", function(assert) {
   assert.deepEqual(delays, [2, 4, 8, 16, 32], "should increase delay over time");
 });
 
+test("it detects offline state and halts saving until reconnecting", function(assert) {
+  let service = this.subject();
+  service.set("isOnline", true);
+
+  $(window).trigger("offline");
+  assert.equal(service.get("isOnline"), false, "should be marked as offline");
+
+  let saveSpy = this.sinon.spy(service, "saveNext");
+  $(window).trigger("online");
+  assert.equal(service.get("isOnline"), true, "should be marked as online");
+  this.sinon.assert.called(saveSpy);
+});
+
 test("it triggers events", function(assert) {
   let service = this.subject();
   let completeCount = 0;
