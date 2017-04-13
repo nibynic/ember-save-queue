@@ -2,7 +2,7 @@ import Ember from "ember";
 
 export default Ember.Object.extend({
   isReady: false,
-  attemptCount: 0,
+  retryCount: 0,
 
   canSave: Ember.computed.and("isReady", "modelCanSave"),
 
@@ -16,13 +16,23 @@ export default Ember.Object.extend({
       );
     } else {
       this.makeReady();
-    }    
+    }
     this._super(...arguments);
   },
 
   willDestroy() {
     Ember.run.cancel(this.laterRun);
     this._super(...arguments);
+  },
+
+  scheduleRetry() {
+    let delay = Math.pow(2, this.get("retryCount")) * this.get("saveQueue.retryDelay");
+
+    this.incrementProperty("retryCount");
+    this.set("isReady", false);
+
+    Ember.run.cancel(this.laterRun);
+    this.laterRun = Ember.run.later(this, this.makeReady, delay);
   },
 
   makeReady() {

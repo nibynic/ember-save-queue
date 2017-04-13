@@ -1,10 +1,16 @@
 import Ember from "ember";
 import { moduleFor, test } from 'ember-qunit';
 import Model from "../../helpers/model";
+import sinon from "sinon";
 
 moduleFor('service:save-queue', 'Unit | Service | save queue', {
-  // Specify the other units that are required for this test.
-  // needs: ['service:foo']
+  beforeEach() {
+    this.sinon = sinon.sandbox.create();
+  },
+
+  afterEach() {
+    this.sinon.restore();
+  }
 });
 
 
@@ -155,7 +161,7 @@ test("it re-enqueues record if after save it still has some dirty attributes", f
   });
 });
 
-test("it repeats repeats save on failure", function(assert) {
+test("it repeats save on failure", function(assert) {
   let saveCount = 0, eventCount = 0;
 
   let service = this.subject();
@@ -170,17 +176,28 @@ test("it repeats repeats save on failure", function(assert) {
     }
   }).create();
 
+  let delays = [];
+  this.sinon.stub(Ember.run, "later").callsFake((context, method, delay) => {
+    delays.push(delay);
+    method.apply(context);
+    return Math.random();
+  });
+
   Ember.run(function() {
     service.set("delay", 0);
     service.set("autoSave", false);
+    service.set("maxRetries", 5);
+    service.set("retryDelay", 2);
     service.enqueue(record1);
   });
 
   Ember.run(function() {
     service.save();
   });
-  assert.equal(saveCount, 5, "should try to save 5 times");
+
+  assert.equal(saveCount, 6, "should try to save 6 times");
   assert.equal(eventCount, 1, "should trigger error event 1 time");
+  assert.deepEqual(delays, [2, 4, 8, 16, 32], "should increase delay over time");
 });
 
 test("it triggers events", function(assert) {

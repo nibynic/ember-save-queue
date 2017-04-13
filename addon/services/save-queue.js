@@ -5,6 +5,8 @@ export default Ember.Service.extend(Ember.Evented, {
 
   autoSave: true,
   delay: 1000,
+  maxRetries: 5,
+  retryDelay: 10000,
 
   isSaving: false,
   length: Ember.computed.reads("queue.length"),
@@ -65,8 +67,8 @@ export default Ember.Service.extend(Ember.Evented, {
           this.saveNext();
         }, () => {
           this.set("isSaving", false);
-          if (item.attemptCount < 4) {
-            item.attemptCount++;
+          if (item.get("retryCount") < this.get("maxRetries")) {
+            item.scheduleRetry();
           } else {
             queue.removeObject(item.destroy());
             this.trigger("error", item.model);
