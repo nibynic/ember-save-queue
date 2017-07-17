@@ -76,10 +76,8 @@ export default Ember.Service.extend(Ember.Evented, {
           this.saveNext();
         }, (error) => {
           this.set("isSaving", false);
-          if (item.get("retryCount") < this.get("maxRetries")) {
-            if (this.shouldRetry(error)) {
-              item.scheduleRetry();
-            }
+          if (item.get("retryCount") < this.get("maxRetries") && this.shouldRetry(error)) {
+            item.scheduleRetry();
           } else {
             queue.removeObject(item.destroy());
             this.trigger("error", item.model);
