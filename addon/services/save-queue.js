@@ -74,10 +74,12 @@ export default Ember.Service.extend(Ember.Evented, {
             queue.removeObject(item.destroy());
           }
           this.saveNext();
-        }, () => {
+        }, (error) => {
           this.set("isSaving", false);
           if (item.get("retryCount") < this.get("maxRetries")) {
-            item.scheduleRetry();
+            if (this.shouldRetry(error)) {
+              item.scheduleRetry();
+            }
           } else {
             queue.removeObject(item.destroy());
             this.trigger("error", item.model);
@@ -89,6 +91,10 @@ export default Ember.Service.extend(Ember.Evented, {
       this.set("wasSaving", false);
       this.trigger("complete");
     }
+  },
+
+  shouldRetry(error) {
+    return true;
   },
 
   queue: Ember.computed(function() {
